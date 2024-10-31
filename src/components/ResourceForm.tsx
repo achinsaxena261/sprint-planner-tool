@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
+import ConfigForm from './ConfigForm';
+import StoryPointsForm from './StoryPointsForm';
 
 export interface Resource {
     resourceName: string;
@@ -44,27 +46,42 @@ const ResourceForm: React.FC = () => {
     });
 
     const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [dialog, setDialog] = useState<boolean>(false);
+    const [openedConfig, setOpenedConfig] = useState<boolean>(false);
+    const [openedMappings, setOpenedMappings] = useState<boolean>(false);
+    const [openedResource, setOpenedResource] = useState<boolean>(false);
 
     useEffect(() => {
         if (selectedConfig) {
-            const updatedFormData = {
-                resourceName: '',
-                role: '',
-                maxCapacityPerDay: selectedConfig.defaultWorkingHoursPerDay,
-                workdaysPerSprint: selectedConfig.availableDaysPerSprint,
-                leaves: selectedConfig.publicHolidays,
-                availableDays: selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays,
-                totalAvailableHours: (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay,
-                totalAvailableCapacity: Math.round(((selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay) / 8),
-                storyPoints: 0,
-            };
-
-            const mapping = storyPointsMapping.find(m => m.days === updatedFormData.totalAvailableCapacity);
-            updatedFormData.storyPoints = mapping ? mapping.points : 0;
-
+            const updatedFormData = getDefaultFormData();
             setFormData(updatedFormData);
         }
     }, [selectedConfigIndex, selectedConfig]);
+
+    useEffect(() => {
+        if(editIndex == null && selectedConfig) {
+            const updatedFormData = getDefaultFormData();
+            setFormData(updatedFormData);            
+        }
+    }, [editIndex])
+
+    const getDefaultFormData = () => {
+        const updatedFormData = {
+            resourceName: '',
+            role: '',
+            maxCapacityPerDay: selectedConfig.defaultWorkingHoursPerDay,
+            workdaysPerSprint: selectedConfig.availableDaysPerSprint,
+            leaves: selectedConfig.publicHolidays,
+            availableDays: selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays,
+            totalAvailableHours: (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay,
+            totalAvailableCapacity: Math.round(((selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay) / 8),
+            storyPoints: 0,
+        };
+
+        const mapping = storyPointsMapping.find(m => m.days === updatedFormData.totalAvailableCapacity);
+        updatedFormData.storyPoints = mapping ? mapping.points : 0;
+        return updatedFormData;
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -103,23 +120,12 @@ const ResourceForm: React.FC = () => {
             : [...resources, formData];
         setResources(updatedResources);
         setCookie('resources', updatedResources, { path: '/' });
-        setFormData({
-            resourceName: '',
-            role: '',
-            maxCapacityPerDay: selectedConfig.defaultWorkingHoursPerDay,
-            workdaysPerSprint: selectedConfig.availableDaysPerSprint,
-            leaves: selectedConfig.publicHolidays,
-            availableDays: selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays,
-            totalAvailableHours: (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay,
-            totalAvailableCapacity: Math.round(((selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay) / 8),
-            storyPoints: 0,
-        });
         setEditIndex(null);
     };
 
     const handleEdit = (index: number) => {
         setFormData(resources[index]);
-        setEditIndex(index);
+        openResource(index);
     };
 
     const handleRemove = (index: number) => {
@@ -128,10 +134,36 @@ const ResourceForm: React.FC = () => {
         setCookie('resources', updatedResources, { path: '/' });
     };
 
+    const openConfig = () => {
+        setOpenedConfig(true);
+        setOpenedMappings(false);
+        setOpenedResource(false);
+        setDialog(true);
+    }
+
+    const openMappings = () => {
+        setOpenedConfig(false);
+        setOpenedMappings(true);
+        setOpenedResource(false);
+        setDialog(true);
+    }
+
+    const openResource = (index: number | null) => {
+        setEditIndex(index);
+        setOpenedConfig(false);
+        setOpenedMappings(false);
+        setOpenedResource(true);
+        setDialog(true);
+    }
+
     return (
         <div>
+            <div className="toolbar">
+                <button onClick={openConfig}>Manage Configuration</button>
+                <button onClick={openMappings}>Story Pointing Config</button>
+                <button onClick={() => openResource(null)}>Add New Resource</button>
+            </div>
             <h3>Existing Resources</h3>
-
             <table>
                 <thead>
                     <tr>
@@ -166,24 +198,84 @@ const ResourceForm: React.FC = () => {
                     ))}
                 </tbody>
             </table>
-            <form onSubmit={handleSubmit}>
-                <input type="text" name="resourceName" value={formData.resourceName} onChange={handleChange} placeholder="Resource Name" required />
-                <input type="text" name="role" value={formData.role} onChange={handleChange} placeholder="Role" required />
-                <select value={selectedConfigIndex} onChange={handleConfigChange}>
-                    {cookies.configs && cookies.configs.map((config, index) => (
-                        <option key={index} value={index}>
-                            {config.workLocation}
-                        </option>
-                    ))}
-                </select>
-                <input type="number" name="maxCapacityPerDay" value={formData.maxCapacityPerDay} onChange={handleChange} placeholder="Max Capacity Per Day" required />
-                <input type="number" name="leaves" value={formData.leaves} onChange={handleChange} placeholder="Leaves/Public Holidays" required />
-                <input type="number" name="availableDays" value={formData.availableDays} placeholder="Available Days" readOnly />
-                <input type="number" name="totalAvailableHours" value={formData.totalAvailableHours} placeholder="Total Available Hours" readOnly />
-                <input type="number" name="totalAvailableCapacity" value={formData.totalAvailableCapacity} placeholder="Total Available Capacity" readOnly />
-                <input type="number" name="storyPoints" value={formData.storyPoints} placeholder="Story Points" readOnly />
-                <button type="submit">{editIndex !== null ? 'Update Resource' : 'Add Resource'}</button>
-            </form>
+            <div className={dialog ? "modal-dialog-overlay show" : "modal-dialog-overlay"}>
+                <div className="modal-dialog">
+                    <div className={openedResource ? "modal-content show" : "modal-content"}>
+                        <div className='modal-dialog-header'>
+                            <h3>Manage Resource</h3>
+                            <button onClick={() => setDialog(false)} className="modal-action-close">X</button>
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <table>
+                                <tr>
+                                    <td><label>Resource Name</label></td>
+                                    <td><input type="text" name="resourceName" value={formData.resourceName} onChange={handleChange} placeholder="Resource Name" required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Role</label></td>
+                                    <td><input type="text" name="role" value={formData.role} onChange={handleChange} placeholder="Role" required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Location</label></td>
+                                    <td>
+                                        <select value={selectedConfigIndex} onChange={handleConfigChange}>
+                                            {cookies.configs && cookies.configs.map((config, index) => (
+                                                <option key={index} value={index}>
+                                                    {config.workLocation}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>Max Capacity Per Day (hrs)</label></td>
+                                    <td><input type="number" name="maxCapacityPerDay" value={formData.maxCapacityPerDay} onChange={handleChange} placeholder="Max Capacity Per Day" required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Leaves</label></td>
+                                    <td><input type="number" name="leaves" value={formData.leaves} onChange={handleChange} placeholder="Leaves/Public Holidays" required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Available Days</label></td>
+                                    <td><input type="number" name="availableDays" value={formData.availableDays} placeholder="Available Days" readOnly /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Available Hours</label></td>
+                                    <td><input type="number" name="totalAvailableHours" value={formData.totalAvailableHours} placeholder="Total Available Hours" readOnly /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Total Available Capacity (Man-Days)</label></td>
+                                    <td><input type="number" name="totalAvailableCapacity" value={formData.totalAvailableCapacity} placeholder="Total Available Capacity" readOnly /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Achievable Story Points</label></td>
+                                    <td><input type="number" name="storyPoints" value={formData.storyPoints} placeholder="Story Points" readOnly /></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <button type="submit">{editIndex !== null ? 'Update Resource' : 'Add Resource'}</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                    <div className={openedConfig ? "modal-content show" : "modal-content"}>
+                        <div className='modal-dialog-header'>
+                            <h3>Configuration</h3>
+                            <button onClick={() => setDialog(false)} className="modal-action-close">X</button>
+                        </div>
+                        <ConfigForm />
+                    </div>
+                    <div className={openedMappings ? "modal-content show" : "modal-content"}>
+                        <div className='modal-dialog-header'>
+                            <h3>Story Points</h3>
+                            <button onClick={() => setDialog(false)} className="modal-action-close">X</button>
+                        </div>
+                        <StoryPointsForm />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

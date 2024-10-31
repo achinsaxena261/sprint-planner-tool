@@ -5,22 +5,12 @@ import ResourceForm from './components/ResourceForm';
 import './styles.css';
 
 const App: React.FC = () => {
-  return (
-    <div className="App">
-      <CssBaseline />
-      <Grid container>
-        <Grid item className="sidebar">
-          <Sidebar />
-        </Grid>
-        <Grid item xs className="content">
-          <Container>
+    return (
+        <div className="App">
             <h1>Sprint Planner</h1>
             <ResourceForm />
-          </Container>
-        </Grid>
-      </Grid>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default App;

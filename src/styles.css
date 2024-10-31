@@ -8,23 +8,21 @@ body {
   }
   
   .App {
-    display: flex;
+    padding: 1rem;
   }
-  
-  .sidebar {
-    width: 240px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .content {
-    flex-grow: 1;
-    padding: 20px;
-  }
-  
+   
   h1 {
     font-size: 2rem;
     margin-bottom: 20px;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .toolbar button {
+    margin: 10px;
   }
   
   form {
@@ -76,4 +74,50 @@ body {
   .actions button {
     margin-right: 5px;
   }
-  
+
+  .modal-dialog-overlay {
+    top:0;
+    left:0;
+    position: absolute;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    background-color: #0000006c;
+    width: 100%;
+    height: 100%;
+  }
+
+  .modal-dialog-overlay .modal-dialog {
+    padding: 1rem;
+    box-shadow: 0 0 1px 1px #bbbbbb;
+    background-color: #ffffff;
+    width: 50%;
+    height: 90%;
+  }
+
+  .modal-dialog-overlay.show {
+    display: flex;
+  }
+
+  .modal-dialog .modal-dialog-header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .modal-dialog .modal-action-close {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    color: #000000;
+  }
+
+  .modal-dialog .modal-content {
+    display: none;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .modal-dialog .modal-content.show {
+    display: block;
+  }

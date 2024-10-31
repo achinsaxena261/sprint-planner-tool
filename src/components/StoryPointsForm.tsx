@@ -43,7 +43,6 @@ const StoryPointsForm: React.FC = () => {
 
   return (
     <div>
-      <h2>Story Points Mapping</h2>
       <table>
         <thead>
           <tr>
@@ -74,9 +73,15 @@ const StoryPointsForm: React.FC = () => {
               </td>
             </tr>
           ))}
+          <tr>
+            <td></td>
+            <td></td>
+            <td>      
+                <button onClick={handleAddRow}>Add Row</button>
+            </td>
+          </tr>
         </tbody>
       </table>
-      <button onClick={handleAddRow}>Add Row</button>
     </div>
   );
 };

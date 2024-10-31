@@ -58,7 +58,6 @@ const ConfigForm: React.FC = () => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <h2>Configuration</h2>
         <label>
           Work Location:
           <input type="text" name="workLocation" value={formData.workLocation} onChange={handleChange} required />
