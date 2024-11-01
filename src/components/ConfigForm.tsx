@@ -58,34 +58,41 @@ const ConfigForm: React.FC = () => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <label>
-          Work Location:
-          <input type="text" name="workLocation" value={formData.workLocation} onChange={handleChange} required />
-        </label>
-        <label>
-          Available Days per Sprint:
-          <input type="number" name="availableDaysPerSprint" value={formData.availableDaysPerSprint} onChange={handleChange} required />
-        </label>
-        <label>
-          Default Working Hours per Day:
-          <input type="number" name="defaultWorkingHoursPerDay" value={formData.defaultWorkingHoursPerDay} onChange={handleChange} required />
-        </label>
-        <label>
-          Public Holidays:
-          <input type="number" name="publicHolidays" value={formData.publicHolidays} onChange={handleChange} required />
-        </label>
-        <button type="submit">{editIndex !== null ? 'Update Configuration' : 'Add Configuration'}</button>
+        <table>
+          <tr>
+            <td><label>Work Location:</label></td>
+            <td><input type="text" name="workLocation" value={formData.workLocation} onChange={handleChange} required /></td>
+          </tr>
+          <tr>
+            <td><label>Available Days per Sprint:</label></td>
+            <td><input type="number" name="availableDaysPerSprint" value={formData.availableDaysPerSprint} onChange={handleChange} required /></td>
+          </tr>
+          <tr>
+            <td><label>
+              Default Working Hours per Day:</label></td>
+            <td><input type="number" name="defaultWorkingHoursPerDay" value={formData.defaultWorkingHoursPerDay} onChange={handleChange} required /></td>
+          </tr>
+          <tr>
+            <td><label>
+              Public Holidays:</label></td>
+            <td><input type="number" name="publicHolidays" value={formData.publicHolidays} onChange={handleChange} required /></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><button type="submit">{editIndex !== null ? 'Update Configuration' : 'Add Configuration'}</button></td>
+          </tr>
+        </table>
       </form>
       <h3>Existing Configurations</h3>
-      <ul>
+      <table>
         {configs.map((config, index) => (
-          <li key={index}>
-            {config.workLocation}: {config.availableDaysPerSprint} days, {config.defaultWorkingHoursPerDay} hrs/day, {config.publicHolidays} holidays
-            <button onClick={() => handleEdit(index)}>Edit</button>
-            <button onClick={() => handleRemove(index)}>Remove</button>
-          </li>
+          <tr key={index}>
+            <td>{config.workLocation}: {config.availableDaysPerSprint} days, {config.defaultWorkingHoursPerDay} hrs/day, {config.publicHolidays} holidays</td>
+            <td><button onClick={() => handleEdit(index)}>Edit</button></td>
+            <td><button onClick={() => handleRemove(index)}>Remove</button></td>
+          </tr>
         ))}
-      </ul>
+      </table>
     </div>
   );
 };
