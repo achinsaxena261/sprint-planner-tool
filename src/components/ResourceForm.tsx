@@ -6,6 +6,7 @@ import StoryPointsForm from './StoryPointsForm';
 export interface Resource {
     resourceName: string;
     role: string;
+    location: string;
     maxCapacityPerDay: number;
     workdaysPerSprint: number;
     leaves: number;
@@ -33,17 +34,26 @@ const ResourceForm: React.FC = () => {
         { days: 10, points: 8 },
     ];
 
-    const [formData, setFormData] = useState<Resource>({
-        resourceName: '',
-        role: '',
-        maxCapacityPerDay: selectedConfig ? selectedConfig.defaultWorkingHoursPerDay : 0,
-        workdaysPerSprint: selectedConfig ? selectedConfig.availableDaysPerSprint : 0,
-        leaves: selectedConfig ? selectedConfig.publicHolidays : 0,
-        availableDays: selectedConfig ? selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays : 0,
-        totalAvailableHours: selectedConfig ? (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay : 0,
-        totalAvailableCapacity: selectedConfig ? Math.round(((selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay) / 8) : 0,
-        storyPoints: 0,
-    });
+    const getDefaultFormData = () => {
+        const updatedFormData = {
+            resourceName: '',
+            role: '',
+            location: selectedConfig.workLocation,
+            maxCapacityPerDay: selectedConfig.defaultWorkingHoursPerDay,
+            workdaysPerSprint: selectedConfig.availableDaysPerSprint,
+            leaves: 0,
+            availableDays: selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays,
+            totalAvailableHours: (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay,
+            totalAvailableCapacity: Math.round(((selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay) / 8),
+            storyPoints: 0,
+        };
+
+        const mapping = storyPointsMapping.find(m => m.days === updatedFormData.totalAvailableCapacity);
+        updatedFormData.storyPoints = mapping ? mapping.points : 0;
+        return updatedFormData;
+    }
+
+    const [formData, setFormData] = useState<Resource>(getDefaultFormData());
 
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [dialog, setDialog] = useState<boolean>(false);
@@ -65,32 +75,9 @@ const ResourceForm: React.FC = () => {
         }
     }, [editIndex])
 
-    const getDefaultFormData = () => {
-        const updatedFormData = {
-            resourceName: '',
-            role: '',
-            maxCapacityPerDay: selectedConfig.defaultWorkingHoursPerDay,
-            workdaysPerSprint: selectedConfig.availableDaysPerSprint,
-            leaves: selectedConfig.publicHolidays,
-            availableDays: selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays,
-            totalAvailableHours: (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay,
-            totalAvailableCapacity: Math.round(((selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay) / 8),
-            storyPoints: 0,
-        };
-
-        const mapping = storyPointsMapping.find(m => m.days === updatedFormData.totalAvailableCapacity);
-        updatedFormData.storyPoints = mapping ? mapping.points : 0;
-        return updatedFormData;
-    }
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         const newValue = parseInt(value, 10);
-
-        if (name === 'leaves' && newValue < selectedConfig.publicHolidays) {
-            alert('Leaves cannot be less than public holidays.');
-            return;
-        }
 
         const updatedFormData = {
             ...formData,
@@ -98,9 +85,9 @@ const ResourceForm: React.FC = () => {
         };
 
         if (name === 'maxCapacityPerDay' || name === 'leaves') {
-            updatedFormData.availableDays = selectedConfig.availableDaysPerSprint - updatedFormData.leaves;
+            updatedFormData.availableDays = selectedConfig.availableDaysPerSprint - updatedFormData.leaves - selectedConfig.publicHolidays;
             updatedFormData.totalAvailableHours = updatedFormData.availableDays * updatedFormData.maxCapacityPerDay;
-            updatedFormData.totalAvailableCapacity = Math.round(updatedFormData.totalAvailableHours / 8);
+            updatedFormData.totalAvailableCapacity = Math.round(updatedFormData.totalAvailableHours / selectedConfig.defaultWorkingHoursPerDay);
 
             const mapping = storyPointsMapping.find(m => m.days === updatedFormData.totalAvailableCapacity);
             updatedFormData.storyPoints = mapping ? mapping.points : 0;
@@ -121,6 +108,7 @@ const ResourceForm: React.FC = () => {
         setResources(updatedResources);
         setCookie('resources', updatedResources, { path: '/' });
         setEditIndex(null);
+        setDialog(false);
     };
 
     const handleEdit = (index: number) => {
@@ -169,9 +157,9 @@ const ResourceForm: React.FC = () => {
                     <tr>
                         <th>Resource Name</th>
                         <th>Role</th>
-                        <th>Max Capacity Per Day (hrs)</th>
+                        <th>Location</th>
                         <th>Workdays per Sprint</th>
-                        <th>Leaves/Public Holidays</th>
+                        <th>Leaves</th>
                         <th>Available Days</th>
                         <th>Total Available Hours</th>
                         <th>Total Available Capacity (in man-days)</th>
@@ -185,7 +173,7 @@ const ResourceForm: React.FC = () => {
                         <tr key={index}>
                             <td>{resource.resourceName}</td>
                             <td>{resource.role}</td>
-                            <td>{resource.maxCapacityPerDay}</td>
+                            <td>{resource.location}</td>
                             <td>{resource.workdaysPerSprint}</td>
                             <td>{resource.leaves}</td>
                             <td>{resource.availableDays}</td>
