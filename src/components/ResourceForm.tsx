@@ -38,13 +38,13 @@ const ResourceForm: React.FC = () => {
         const updatedFormData = {
             resourceName: '',
             role: '',
-            location: selectedConfig.workLocation,
-            maxCapacityPerDay: selectedConfig.defaultWorkingHoursPerDay,
-            workdaysPerSprint: selectedConfig.availableDaysPerSprint,
+            location: selectedConfig?.workLocation,
+            maxCapacityPerDay: selectedConfig?.defaultWorkingHoursPerDay,
+            workdaysPerSprint: selectedConfig?.availableDaysPerSprint,
             leaves: 0,
-            availableDays: selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays,
-            totalAvailableHours: (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay,
-            totalAvailableCapacity: Math.round(((selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay) / 8),
+            availableDays: selectedConfig ? selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays : 0,
+            totalAvailableHours: selectedConfig ? (selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays) * selectedConfig.defaultWorkingHoursPerDay : 0,
+            totalAvailableCapacity: selectedConfig ? selectedConfig.availableDaysPerSprint - selectedConfig.publicHolidays : 0,
             storyPoints: 0,
         };
 
