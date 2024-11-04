@@ -158,7 +158,6 @@ const ResourceForm: React.FC = () => {
                         <th>Resource Name</th>
                         <th>Role</th>
                         <th>Location</th>
-                        <th>Workdays per Sprint</th>
                         <th>Leaves</th>
                         <th>Available Days</th>
                         <th>Total Available Hours</th>
@@ -174,7 +173,6 @@ const ResourceForm: React.FC = () => {
                             <td>{resource.resourceName}</td>
                             <td>{resource.role}</td>
                             <td>{resource.location}</td>
-                            <td>{resource.workdaysPerSprint}</td>
                             <td>{resource.leaves}</td>
                             <td>{resource.availableDays}</td>
                             <td>{resource.totalAvailableHours}</td>
