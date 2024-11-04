@@ -69,9 +69,9 @@ const ResourceForm: React.FC = () => {
     }, [selectedConfigIndex, selectedConfig]);
 
     useEffect(() => {
-        if(editIndex == null && selectedConfig) {
+        if (editIndex == null && selectedConfig) {
             const updatedFormData = getDefaultFormData();
-            setFormData(updatedFormData);            
+            setFormData(updatedFormData);
         }
     }, [editIndex])
 
@@ -194,14 +194,6 @@ const ResourceForm: React.FC = () => {
                         <form onSubmit={handleSubmit}>
                             <table>
                                 <tr>
-                                    <td><label>Resource Name</label></td>
-                                    <td><input type="text" name="resourceName" value={formData.resourceName} onChange={handleChange} placeholder="Resource Name" required /></td>
-                                </tr>
-                                <tr>
-                                    <td><label>Role</label></td>
-                                    <td><input type="text" name="role" value={formData.role} onChange={handleChange} placeholder="Role" required /></td>
-                                </tr>
-                                <tr>
                                     <td><label>Location</label></td>
                                     <td>
                                         <select value={selectedConfigIndex} onChange={handleConfigChange}>
@@ -212,6 +204,14 @@ const ResourceForm: React.FC = () => {
                                             ))}
                                         </select>
                                     </td>
+                                </tr>
+                                <tr>
+                                    <td><label>Resource Name</label></td>
+                                    <td><input type="text" name="resourceName" value={formData.resourceName} onChange={handleChange} placeholder="Resource Name" required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Role</label></td>
+                                    <td><input type="text" name="role" value={formData.role} onChange={handleChange} placeholder="Role" required /></td>
                                 </tr>
                                 <tr>
                                     <td><label>Max Capacity Per Day (hrs)</label></td>
